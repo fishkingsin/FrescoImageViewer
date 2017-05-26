@@ -29,6 +29,7 @@ public class StyledViewActivity extends DemoActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        init();
         options = new StylingOptions();
 
         AppUtils.showGotItSnackbar(findViewById(R.id.coordinator),

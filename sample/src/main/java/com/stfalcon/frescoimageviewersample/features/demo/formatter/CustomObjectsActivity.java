@@ -23,7 +23,7 @@ public class CustomObjectsActivity extends DemoActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        init();
         images = Demo.getCustomImages();
         AppUtils.showGotItSnackbar(findViewById(R.id.coordinator), R.string.custom_objects_hint);
     }

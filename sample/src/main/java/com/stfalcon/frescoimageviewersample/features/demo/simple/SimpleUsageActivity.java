@@ -12,7 +12,7 @@ public class SimpleUsageActivity extends DemoActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        init();
         AppUtils.showInfoSnackbar(findViewById(R.id.coordinator),
                 R.string.message_open_viewer, true);
     }

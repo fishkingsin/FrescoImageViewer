@@ -8,6 +8,12 @@ import com.stfalcon.frescoimageviewersample.common.data.Demo;
 import com.stfalcon.frescoimageviewersample.features.demo.DemoActivity;
 import com.stfalcon.frescoimageviewersample.utils.AppUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class DialogRotationExampleActivity extends DemoActivity {
 
     private static final String KEY_IS_DIALOG_SHOWN = "IS_DIALOG_SHOWN";
@@ -19,7 +25,7 @@ public class DialogRotationExampleActivity extends DemoActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        init();
         AppUtils.showInfoSnackbar(findViewById(R.id.coordinator),
                 R.string.message_rotate, true);
     }
@@ -48,8 +54,24 @@ public class DialogRotationExampleActivity extends DemoActivity {
     protected void showPicker(int startPosition) {
         isDialogShown = true;
         currentPosition = startPosition;
+        ArrayList<String> rowListItem = new ArrayList<>(Arrays.asList(Demo.getFlickrs()));
+        try {
+            String jsonString = Demo.getFlickrs();
+            JSONArray array = new JSONArray(jsonString);
+            ArrayList<String> previewUrls = new ArrayList();
+            ArrayList<String> thumbnailUrls = new ArrayList();
+            for(int i = 0 ; i < array.length() ; i++) {
+                previewUrls.add(array.getJSONObject(i).getString("previewUrl"));
+                thumbnailUrls.add(array.getJSONObject(i).getString("thumbnailUrl"));
+            }
 
-        new ImageViewer.Builder<>(this, Demo.getPosters())
+            posters = previewUrls.toArray(new String[0]);
+            descriptions = previewUrls.toArray(new String[0]);
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+        }
+        new ImageViewer.Builder<>(this, posters)
                 .setStartPosition(startPosition)
                 .setImageChangeListener(getImageChangeListener())
                 .setOnDismissListener(getDismissListener())

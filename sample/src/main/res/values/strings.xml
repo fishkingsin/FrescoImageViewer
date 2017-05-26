@@ -23,6 +23,9 @@
     <string name="custom_objects_hint">This example uses custom image objects and shows images via custom formatter.</string>
     <string name="got_it">Got it!</string>
     <string name="action_options">Options</string>
+    <string name="item1">Item1</string>
+    <string name="item2">item2</string>
+    <string name="SelectPhoto">Select Photos</string>
 
     <string-array name="options">
         <item>hide status bar</item>
