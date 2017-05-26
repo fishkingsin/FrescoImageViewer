@@ -103,6 +103,10 @@ public class ImageViewer implements OnDismissListener, DialogInterface.OnKeyList
         });
     }
 
+    public void updateImages(List<?> images) {
+        viewer.updateImages(images);
+    }
+
     /**
      * Fires when swipe to dismiss was initiated
      */
@@ -189,6 +193,15 @@ public class ImageViewer implements OnDismissListener, DialogInterface.OnKeyList
 
         public List<T> getData() {
             return data;
+        }
+
+        public boolean addData(int position, List<?> data) {
+            return this.data.addAll(position, (List<? extends T>) data);
+        }
+
+        public void updateData(List<?> data) {
+            this.data.clear();
+            this.data.addAll((List<? extends T>) data);
         }
     }
 
