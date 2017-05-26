@@ -17,8 +17,10 @@ import java.util.List;
  */
 public class CustomObjectsActivity extends DemoActivity {
 
+    private static final java.lang.String KEY_CURRENT_POSITION = "position";
     private List<CustomImage> images;
     private ImageOverlayView overlayView;
+    private int currentPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,4 +59,20 @@ public class CustomObjectsActivity extends DemoActivity {
             }
         };
     }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            currentPosition = savedInstanceState.getInt(KEY_CURRENT_POSITION);
+        }
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(KEY_CURRENT_POSITION, currentPosition);
+        super.onSaveInstanceState(outState);
+    }
+
 }

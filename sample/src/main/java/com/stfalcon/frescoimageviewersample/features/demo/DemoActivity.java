@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 
 import com.stfalcon.frescoimageviewersample.R;
 import com.stfalcon.frescoimageviewersample.common.data.Demo;
@@ -22,20 +23,16 @@ import java.util.List;
 /*
  * Created by troy379 on 06.03.17.
  */
-public abstract class DemoActivity extends AppCompatActivity {
+public abstract class DemoActivity extends AppCompatActivity implements RecyclerItemClickListener.OnItemClickListener , RecyclerViewAdapter.RecyclerViewAdapterListener {
     private static final String TAG = DemoActivity.class.getSimpleName();
     RecyclerView recyclerView;
     GridLayoutManager lLayout;
-//    private static final int[] ids = new int[]{
-//            R.id.firstImage, R.id.secondImage,
-//            R.id.thirdImage, R.id.fourthImage,
-//            R.id.fifthImage, R.id.sixthImage,
-//            R.id.seventhImage, R.id.eighthImage,
-//            R.id.ninethImage
-//    };
+
 
     protected String[] posters, descriptions;
-    private boolean selected;
+    protected boolean[] selections;
+    private boolean selectionMode;
+    private RecyclerViewAdapter rcAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +54,9 @@ public abstract class DemoActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.item1:
-                selected = !selected;
+                selectionMode = !selectionMode;
+                rcAdapter.notifyDataSetChanged();
+
                 return true;
             case R.id.item2:
 
@@ -96,40 +95,47 @@ public abstract class DemoActivity extends AppCompatActivity {
             rowListItem = thumbnailUrls;
             posters = previewUrls.toArray(new String[0]);
             descriptions = previewUrls.toArray(new String[0]);
+            selections = new boolean[posters.length];
         } catch (JSONException e) {
             e.printStackTrace();
 
         }
 
 
-        RecyclerViewAdapter rcAdapter = new RecyclerViewAdapter(DemoActivity.this, rowListItem);
+        rcAdapter = new RecyclerViewAdapter(DemoActivity.this, rowListItem);
         recyclerView.setAdapter(rcAdapter);
-        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(DemoActivity.this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                showPicker(position);
+        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(DemoActivity.this, recyclerView, this));
 
-            }
-
-            @Override
-            public void onItemLongClick(View view, int position) {
-                // ...
-            }
-        }));
-//
-//        for (int i = 0; i < ids.length; i++) {
-//            SimpleDraweeView drawee = (SimpleDraweeView) findViewById(ids[i]);
-//            initDrawee(drawee, i);
-//        }
     }
-//
-//    private void initDrawee(SimpleDraweeView drawee, final int startPosition) {
-//        drawee.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                showPicker(startPosition);
-//            }
-//        });
-//        drawee.setImageURI(posters[startPosition]);
-//    }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        if(selectionMode){
+            selections[position] = !selections[position];
+            SquareCardView squareCardView = (SquareCardView) view;
+            if(squareCardView != null){
+                CheckBox checkBox = (CheckBox) squareCardView.findViewById(R.id.checkBox);
+                if(selectionMode) {
+                    checkBox.setChecked(selections[position]);
+                }
+
+            }
+        }else {
+            showPicker(position);
+        }
+
+    }
+
+    @Override
+    public void onItemLongClick(View view, int position) {
+        // ...
+    }
+    @Override
+    public boolean isPhotoSelected(int position){
+        return selections[position];
+    }
+    @Override
+    public boolean isPhotoSelectionMode(){
+        return selectionMode;
+    }
 }
