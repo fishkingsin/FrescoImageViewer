@@ -53,7 +53,7 @@ public class CustomObjectsActivity extends DemoActivity implements RecyclerViewA
         actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle("Album");
+            setTitle("Album");
             actionBar.setSubtitle("145 Photos．15 Nov 2016");
         }
 
@@ -154,9 +154,8 @@ public class CustomObjectsActivity extends DemoActivity implements RecyclerViewA
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         if(item.getTitle() != null) {
-            if (item.getTitle().equals(menuOptions[0])) {
-                return true;
-            } else if (item.getTitle().equals(menuOptions[1])) {
+            if (item.getItemId() == R.id.select) {
+
                 selectionMode = !selectionMode;
                 if (!selectionMode) {
                     for (int i = 0; i < selections.length; i++) {
@@ -205,6 +204,16 @@ public class CustomObjectsActivity extends DemoActivity implements RecyclerViewA
     @Override
     public void onItemLongClick(View view, int position) {
         // ...
+        selectionMode = true;
+        selections[position] = !selections[position];
+        SquareCardView squareCardView = (SquareCardView) view;
+        if (squareCardView != null) {
+            CheckBox checkBox = (CheckBox) squareCardView.findViewById(R.id.checkBox);
+            if (selectionMode) {
+                checkBox.setChecked(selections[position]);
+            }
+
+        }
     }
 
     @Override

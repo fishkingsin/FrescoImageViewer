@@ -27,6 +27,9 @@
     <string name="item2">item2</string>
     <string name="SelectPhoto">Select Photos</string>
     <string name="Select">Select</string>
+    <string name="download">Download</string>
+    <string name="bin">bin</string>
+    <string name="send">Send</string>
 
     <string-array name="options">
         <item>hide status bar</item>
