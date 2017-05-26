@@ -33,7 +33,7 @@
         <activity
             android:name=".features.demo.formatter.CustomObjectsActivity"
             android:label="@string/action_custom_objects"
-            android:screenOrientation="portrait"/>
+            />
     </application>
 
 </manifest>

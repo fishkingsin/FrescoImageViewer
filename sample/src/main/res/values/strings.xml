@@ -26,6 +26,7 @@
     <string name="item1">Item1</string>
     <string name="item2">item2</string>
     <string name="SelectPhoto">Select Photos</string>
+    <string name="Select">Select</string>
 
     <string-array name="options">
         <item>hide status bar</item>
