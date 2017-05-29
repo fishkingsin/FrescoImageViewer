@@ -5,21 +5,17 @@
     <item android:id="@+id/send"
           android:icon="@drawable/send"
           android:title="@string/send"
-          app:showAsAction="ifRoom">
+          app:showAsAction="always">
     </item>
     <item android:id="@+id/bin"
           android:icon="@drawable/bin"
           android:title="@string/bin"
-          app:showAsAction="ifRoom">
+          app:showAsAction="always">
     </item>
     <item android:id="@+id/download"
           android:icon="@drawable/download_cloud"
           android:title="@string/download"
-          app:showAsAction="ifRoom">
-    </item>
-    <item android:id="@+id/select"
-          android:title="@string/Select"
-          app:showAsAction="ifRoom">
+          app:showAsAction="always">
     </item>
 
 </menu>
