@@ -5,16 +5,19 @@
     <item android:id="@+id/send"
           android:icon="@drawable/send"
           android:title="@string/send"
+          android:tint="@color/colorAccent"
           app:showAsAction="always">
     </item>
-    <item android:id="@+id/bin"
+    <item android:id="@+id/delete"
           android:icon="@drawable/bin"
           android:title="@string/bin"
+          android:tint="@color/colorAccent"
           app:showAsAction="always">
     </item>
     <item android:id="@+id/download"
           android:icon="@drawable/download_cloud"
           android:title="@string/download"
+          android:tint="@color/colorAccent"
           app:showAsAction="ifRoom">
     </item>
 

@@ -192,6 +192,12 @@ public class CustomObjectsActivity extends DemoActivity implements RecyclerViewA
                 break;
             case R.id.deleteAlbum:
                 break;
+            case R.id.delete:
+                break;
+            case R.id.send:
+                break;
+            case R.id.download:
+                break;
             case android.R.id.home:
                 if(!selectionMode) {
                     finish();
