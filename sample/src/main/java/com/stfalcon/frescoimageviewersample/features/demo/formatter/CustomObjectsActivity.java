@@ -21,7 +21,7 @@ import java.util.List;
 /*
  * Created by troy379 on 06.03.17.
  */
-public class CustomObjectsActivity extends DemoActivity implements RecyclerViewAdapter.RecyclerViewAdapterListener{
+public class CustomObjectsActivity extends DemoActivity implements RecyclerViewAdapter.RecyclerViewAdapterListener {
 
     private static final String KEY_IS_DIALOG_SHOWN = "IS_DIALOG_SHOWN";
     private static final String KEY_CURRENT_POSITION = "CURRENT_POSITION";
@@ -32,7 +32,7 @@ public class CustomObjectsActivity extends DemoActivity implements RecyclerViewA
     private boolean isDialogShown;
     protected boolean[] selections;
     private boolean selectionMode;
-    String []menuOptions;
+    String[] menuOptions;
     private android.support.v7.app.ActionBar actionBar;
 
     @Override
@@ -42,19 +42,12 @@ public class CustomObjectsActivity extends DemoActivity implements RecyclerViewA
         images = Demo.getCustomImages();
 //        AppUtils.showGotItSnackbar(findViewById(R.id.coordinator), R.string.custom_objects_hint);
 
-        menuOptions = new String[]{
-                "ADD_PHOTOS",
-                "SELECT_PHOTOS",
-                "ADD_ALBUM_TO_PLAYLIST",
-                "EDIT_ALBUM_NAME",
-                "DELETE_ALBUM"
-        };
-
         actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            setTitle("Album");
+            actionBar.setTitle("Album");
             actionBar.setSubtitle("145 Photos．15 Nov 2016");
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_up_white_24dp);
         }
 
         selections = new boolean[posters.length];
@@ -128,14 +121,13 @@ public class CustomObjectsActivity extends DemoActivity implements RecyclerViewA
     @Override
     public boolean onCreatePanelMenu(int featureId, Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-
-//        int index = 0;
-//        for (String option : menuOptions) {
-//            //int groupId, int itemId, int order, @StringRes int titleRes
-//            menu.add(0,index,index,option);
-//            index++;
-//        }
+        if (!selectionMode) {
+            inflater.inflate(R.menu.options_menu, menu);
+            setupToolBar();
+        } else {
+            inflater.inflate(R.menu.menu, menu);
+            setupToolBar();
+        }
         return true;
     }
 
@@ -151,36 +143,65 @@ public class CustomObjectsActivity extends DemoActivity implements RecyclerViewA
     }
 
     @Override
+    public boolean onSupportNavigateUp() {
+        if (!selectionMode) {
+            return true;
+        } else {
+            setupSelectionMode(false);
+            return false;
+
+        }
+    }
+    private void setupToolBar() {
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(selectionMode) {
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
+        }else{
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_up_white_24dp);
+        }
+    }
+
+    private void setupSelectionMode(boolean b) {
+        selectionMode = b;
+        if (!selectionMode) {
+            for (int i = 0; i < selections.length; i++) {
+                selections[i] = false;
+            }
+        } else {
+            //TODO show bottom menu
+        }
+        rcAdapter.notifyDataSetChanged();
+
+        invalidateOptionsMenu();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
-        if(item.getTitle() != null) {
-            if (item.getItemId() == R.id.select) {
-
-                selectionMode = !selectionMode;
-                if (!selectionMode) {
-                    for (int i = 0; i < selections.length; i++) {
-                        selections[i] = false;
-                    }
-                } else {
-                    //TODO show bottom menu
-                }
-                rcAdapter.notifyDataSetChanged();
-
-                return true;
-            } else if (item.getTitle().equals(menuOptions[2])) {
-                return true;
-            } else if (item.getTitle().equals(menuOptions[3])) {
-                //TODO EDIT_ALBUM_NAME
-                return true;
-            } else if (item.getTitle().equals(menuOptions[4])) {
-                return true;
-            } else {
-                return super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.selectPhoto: {
+                setupSelectionMode(!selectionMode);
             }
-        }else{
-            finish();
-            return super.onOptionsItemSelected(item);
+            break;
+            case R.id.addPhotos:
+                break;
+            case R.id.addAlbumToPlaylist:
+                break;
+            case R.id.editAlbumName:
+                break;
+            case R.id.deleteAlbum:
+                break;
+            case android.R.id.home:
+                if(!selectionMode) {
+                    finish();
+                }
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+        return false;
+
     }
 
     @Override
@@ -225,7 +246,6 @@ public class CustomObjectsActivity extends DemoActivity implements RecyclerViewA
     public boolean isPhotoSelectionMode() {
         return selectionMode;
     }
-
 
 
 }

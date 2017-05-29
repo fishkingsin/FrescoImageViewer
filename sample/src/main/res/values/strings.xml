@@ -30,6 +30,11 @@
     <string name="download">Download</string>
     <string name="bin">bin</string>
     <string name="send">Send</string>
+    <string name="ADD_PHOTOS">Add photos</string>
+    <string name="SELECT_PHOTOS">Select photos</string>
+    <string name="ADD_ALBUM_TO_PLAYLIST">Add album to playlist</string>
+    <string name="EDIT_ALBUM_NAME">Edit album name</string>
+    <string name="DELETE_ALBUM">Delete album</string>
 
     <string-array name="options">
         <item>hide status bar</item>
