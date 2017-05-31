@@ -20,6 +20,7 @@ import java.util.List;
 
 /*
  * Created by troy379 on 06.03.17.
+ * Modified by James Kong on 28.05.2017
  */
 public class CustomObjectsActivity extends DemoActivity implements RecyclerViewAdapter.RecyclerViewAdapterListener {
 
