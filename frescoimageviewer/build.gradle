@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
+def publishVersionName='0.5.0-dev'
 buildscript {
     repositories {
         jcenter()
@@ -16,7 +17,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 25
         versionCode 1
-        versionName "0.5.0"
+        versionName "$publishVersionName"
     }
     buildTypes {
         release {
@@ -31,7 +32,7 @@ android {
     }
 
 }
-def publishVersionName='0.5.0-dev'
+
 publish {
     userOrg = 'fishkingsin'
     groupId = 'com.github.fishkingsin'

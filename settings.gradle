@@ -1,1 +1,1 @@
-include ':sample', ':frescoimageviewer'
+include ':frescoimageviewer',  ':sample'
