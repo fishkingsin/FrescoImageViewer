@@ -35,7 +35,6 @@ import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 /*
@@ -80,7 +79,7 @@ public class ImageViewer implements OnDismissListener, DialogInterface.OnKeyList
         viewer.setOverlayView(builder.overlayView);
         viewer.setImageMargin(builder.imageMarginPixels);
         viewer.setContainerPadding(builder.containerPaddingPixels);
-        viewer.setUrls(builder.dataSet, builder.startPosition);
+        viewer.setUrls(builder.dataSet, builder.startPosition, builder.onOrientationListener);
         viewer.setPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
@@ -89,6 +88,7 @@ public class ImageViewer implements OnDismissListener, DialogInterface.OnKeyList
                 }
             }
         });
+
 
         dialog = new AlertDialog.Builder(builder.context, getDialogStyle())
                 .setView(viewer)
@@ -153,6 +153,14 @@ public class ImageViewer implements OnDismissListener, DialogInterface.OnKeyList
     public interface OnDismissListener {
         void onDismiss();
     }
+
+    /**
+     * Interface definition for a callback to be invoked when viewer was dismissed
+     */
+    public interface OnOrientationListener {
+        int OnOrientaion(int currentPosition);
+    }
+
 
     private @StyleRes int getDialogStyle() {
         return builder.shouldStatusBarHide
@@ -221,6 +229,7 @@ public class ImageViewer implements OnDismissListener, DialogInterface.OnKeyList
         private int startPosition;
         private OnImageChangeListener imageChangeListener;
         private OnDismissListener onDismissListener;
+        private OnOrientationListener onOrientationListener;
         private View overlayView;
         private int imageMarginPixels;
         private int[] containerPaddingPixels = new int[4];
@@ -410,6 +419,17 @@ public class ImageViewer implements OnDismissListener, DialogInterface.OnKeyList
             this.onDismissListener = onDismissListener;
             return this;
         }
+
+        /**
+         * Set {@link ImageViewer.OnDismissListener} for viewer.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setOnOrientationListener(OnOrientationListener onOrientationListener) {
+            this.onOrientationListener = onOrientationListener;
+            return this;
+        }
+
 
         /**
          * Set @{@code ImageRequestBuilder} for drawees. Use it for post-processing, custom resize options etc.

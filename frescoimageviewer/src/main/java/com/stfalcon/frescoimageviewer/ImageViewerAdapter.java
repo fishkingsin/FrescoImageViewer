@@ -1,21 +1,25 @@
 package com.stfalcon.frescoimageviewer;
 
-import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.drawee.drawable.ProgressBarDrawable;
 import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
+import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.imagepipeline.common.RotationOptions;
 import com.facebook.imagepipeline.image.ImageInfo;
+import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.stfalcon.frescoimageviewer.adapter.RecyclingPagerAdapter;
 import com.stfalcon.frescoimageviewer.adapter.ViewHolder;
@@ -46,17 +50,22 @@ class ImageViewerAdapter
     private ImageRequestBuilder imageRequestBuilder;
     private GenericDraweeHierarchyBuilder hierarchyBuilder;
     private boolean isZoomingAllowed;
+    private ImageViewer.OnOrientationListener orientationListener;
 
     ImageViewerAdapter(Context context, ImageViewer.DataSet<?> dataSet,
                        ImageRequestBuilder imageRequestBuilder,
                        GenericDraweeHierarchyBuilder hierarchyBuilder,
-                       boolean isZoomingAllowed) {
+                       boolean isZoomingAllowed,
+                       ImageViewer.OnOrientationListener orientationListener) {
         this.context = context;
         this.dataSet = dataSet;
         this.holders = new HashSet<>();
         this.imageRequestBuilder = imageRequestBuilder;
         this.hierarchyBuilder = hierarchyBuilder;
         this.isZoomingAllowed = isZoomingAllowed;
+
+        this.orientationListener = orientationListener;
+
     }
 
     public boolean addImage(List<?> images) {
@@ -151,7 +160,11 @@ class ImageViewerAdapter
             this.position = position;
 
             tryToSetHierarchy();
-            setController(dataSet.format(position));
+            int orientation = 0;
+            if (orientationListener != null) {
+                orientation = orientationListener.OnOrientaion(position);
+            }
+            setController(dataSet.format(position), orientation);
 
             drawee.setOnScaleChangeListener(this);
         }
@@ -172,20 +185,22 @@ class ImageViewerAdapter
             }
         }
 
-        private void setController(final String url) {
-            prefetchHeader(url, new HeaderResponse() {
+        private void setController(String url, int orientation) {
+            buildImage(url, orientation);
 
-
-                @Override
-                public void onErrorLoaded(String s) {
-                    buildImage(url, 0);
-                }
-
-                @Override
-                public void onResponseLoaded(final int rotate) {
-                    buildImage(url, rotate);
-                }
-            });
+//            prefetchHeader(url, new HeaderResponse() {
+//
+//
+//                @Override
+//                public void onErrorLoaded(String s) {
+//
+//                }
+//
+//                @Override
+//                public void onResponseLoaded(final int rotate) {
+//                    buildImage(url, rotate);
+//                }
+//            });
 
 
         }
@@ -210,8 +225,8 @@ class ImageViewerAdapter
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     Set<String> names = response.headers().names();
-                    for(String name : names){
-                        Log.d("prefetchHeader","Name :"+name);
+                    for (String name : names) {
+                        Log.d("prefetchHeader", "Name :" + name);
                     }
                     Headers header = response.headers();
                     String headerKey = "x-amz-meta-orientation";
@@ -249,25 +264,40 @@ class ImageViewerAdapter
         }
 
         private void buildImage(final String url, final int rotate) {
-            ((Activity)context).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    PipelineDraweeControllerBuilder controllerBuilder = Fresco.newDraweeControllerBuilder();
-                    controllerBuilder.setUri(url);
 
-                    controllerBuilder.setOldController(drawee.getController());
-                    controllerBuilder.setControllerListener(getDraweeControllerListener(drawee));
-                    if (imageRequestBuilder != null) {
-                        imageRequestBuilder.setSource(Uri.parse(url))
-                                .setRotationOptions(RotationOptions.forceRotation(rotate));
-                        controllerBuilder.setImageRequest(imageRequestBuilder.build());
-                    }
-                    drawee.setController(controllerBuilder.build());
-                }
-            });
+//            PipelineDraweeControllerBuilder controllerBuilder = Fresco.newDraweeControllerBuilder();
+//            controllerBuilder.setUri(url);
+//
+//            controllerBuilder.setOldController(drawee.getController());
+//            controllerBuilder.setControllerListener(getDraweeControllerListener(drawee));
+//            if (imageRequestBuilder != null) {
+//
+//                imageRequestBuilder.setSource(Uri.parse(url))
+//                        .setRotationOptions(RotationOptions.forceRotation(rotate));
+//                controllerBuilder.setImageRequest(imageRequestBuilder.build());
+//            }
+//            drawee.setController(controllerBuilder.build());
+            ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
+                    .setRotationOptions(RotationOptions.forceRotation(rotate))
+                    .build();
+            DraweeController controller = Fresco.newDraweeControllerBuilder()
+                    .setOldController(drawee.getController())
+                    .setControllerListener(getDraweeControllerListener(drawee))
+                    .setImageRequest(request)
+                    .build();
+            final ProgressBarDrawable progressBarDrawable = new ProgressBarDrawable();
+            progressBarDrawable.setColor(context.getResources().getColor(R.color.colorAccent));
+            progressBarDrawable.setBackgroundColor(context.getResources().getColor(R.color.colorPrimaryDark));
+//            progressBarDrawable.setRadius(5);
+            final Drawable failureDrawable = context.getResources().getDrawable(R.drawable.empty);
+            DrawableCompat.setTint(failureDrawable, Color.RED);
+            final Drawable placeholderDrawable = context.getResources().getDrawable(R.drawable.loading);
+            drawee.getHierarchy().setPlaceholderImage(placeholderDrawable, ScalingUtils.ScaleType.CENTER_INSIDE);
+            drawee.getHierarchy().setFailureImage(failureDrawable, ScalingUtils.ScaleType.CENTER_INSIDE);
+            drawee.getHierarchy().setProgressBarImage(progressBarDrawable, ScalingUtils.ScaleType.CENTER_INSIDE);
+            drawee.setController(controller);
         }
     }
-
 
 
     interface HeaderResponse {

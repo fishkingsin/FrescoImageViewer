@@ -77,9 +77,9 @@ public class ImageViewerView extends RelativeLayout
         init();
     }
 
-    public void setUrls(ImageViewer.DataSet<?> dataSet, int startPosition) {
+    public void setUrls(ImageViewer.DataSet<?> dataSet, int startPosition , ImageViewer.OnOrientationListener orientationListener) {
         adapter = new ImageViewerAdapter(
-                getContext(), dataSet, customImageRequestBuilder, customDraweeHierarchyBuilder, isZoomingAllowed);
+                getContext(), dataSet, customImageRequestBuilder, customDraweeHierarchyBuilder, isZoomingAllowed, orientationListener);
         pager.setAdapter(adapter);
         setStartPosition(startPosition);
     }
