@@ -1,8 +1,11 @@
 package com.stfalcon.frescoimageviewer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Animatable;
+import android.media.ExifInterface;
 import android.net.Uri;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -11,16 +14,25 @@ import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.controller.BaseControllerListener;
 import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
+import com.facebook.imagepipeline.common.RotationOptions;
 import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.stfalcon.frescoimageviewer.adapter.RecyclingPagerAdapter;
 import com.stfalcon.frescoimageviewer.adapter.ViewHolder;
 import com.stfalcon.frescoimageviewer.drawee.ZoomableDraweeView;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import me.relex.photodraweeview.OnScaleChangeListener;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Headers;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /*
  * Created by troy379 on 07.12.16.
@@ -160,17 +172,107 @@ class ImageViewerAdapter
             }
         }
 
-        private void setController(String url) {
-            PipelineDraweeControllerBuilder controllerBuilder = Fresco.newDraweeControllerBuilder();
-            controllerBuilder.setUri(url);
-            controllerBuilder.setOldController(drawee.getController());
-            controllerBuilder.setControllerListener(getDraweeControllerListener(drawee));
-            if (imageRequestBuilder != null) {
-                imageRequestBuilder.setSource(Uri.parse(url));
-                controllerBuilder.setImageRequest(imageRequestBuilder.build());
-            }
-            drawee.setController(controllerBuilder.build());
+        private void setController(final String url) {
+            prefetchHeader(url, new HeaderResponse() {
+
+
+                @Override
+                public void onErrorLoaded(String s) {
+                    buildImage(url, 0);
+                }
+
+                @Override
+                public void onResponseLoaded(final int rotate) {
+                    buildImage(url, rotate);
+                }
+            });
+
+
         }
 
+        public void prefetchHeader(String url, final HeaderResponse serverResponse) {
+
+//TODO WARNING a project specfic routine, not for general prupose , may need to deal with it later
+            OkHttpClient client = new OkHttpClient();
+
+            final Request request = new Request.Builder()
+                    .url(url)
+                    .head()
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    Log.e("response", call.request().body().toString());
+                    serverResponse.onErrorLoaded(call.request().body().toString());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    Set<String> names = response.headers().names();
+                    for(String name : names){
+                        Log.d("prefetchHeader","Name :"+name);
+                    }
+                    Headers header = response.headers();
+                    String headerKey = "x-amz-meta-orientation";
+                    int rotation = 0;
+                    if (header.names().contains(headerKey)) {
+                        String orientationValue = response.headers().get(headerKey);
+                        int orientation = Integer.valueOf(orientationValue);
+
+
+                        try {
+                            rotation = exifToDegrees(orientation);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+                    serverResponse.onResponseLoaded(rotation);
+
+                }
+
+
+            });
+        }
+
+        private int exifToDegrees(int exifOrientation) {
+            if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+                return 90;
+            } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
+                return 180;
+            } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                return 270;
+            } else {
+                return 0;
+            }
+        }
+
+        private void buildImage(final String url, final int rotate) {
+            ((Activity)context).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    PipelineDraweeControllerBuilder controllerBuilder = Fresco.newDraweeControllerBuilder();
+                    controllerBuilder.setUri(url);
+
+                    controllerBuilder.setOldController(drawee.getController());
+                    controllerBuilder.setControllerListener(getDraweeControllerListener(drawee));
+                    if (imageRequestBuilder != null) {
+                        imageRequestBuilder.setSource(Uri.parse(url))
+                                .setRotationOptions(RotationOptions.forceRotation(rotate));
+                        controllerBuilder.setImageRequest(imageRequestBuilder.build());
+                    }
+                    drawee.setController(controllerBuilder.build());
+                }
+            });
+        }
+    }
+
+
+
+    interface HeaderResponse {
+        void onErrorLoaded(String s);
+
+        void onResponseLoaded(int rotate);
     }
 }

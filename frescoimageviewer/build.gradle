@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
-def publishVersionName='0.5.0-dev'
+def publishVersionName='0.5.0-dev2'
 buildscript {
     repositories {
         jcenter()
@@ -46,7 +46,8 @@ publish {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.1.1'
+    compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'me.relex:photodraweeview:1.1.0'
     provided 'com.facebook.fresco:fresco:0.12.0'
+    compile "com.facebook.fresco:imagepipeline-okhttp3:1.3.0"
 }
