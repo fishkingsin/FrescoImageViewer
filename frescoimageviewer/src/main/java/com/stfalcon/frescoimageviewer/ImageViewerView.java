@@ -119,13 +119,13 @@ public class ImageViewerView extends RelativeLayout
 
     public void setOverlayView(View view) {
         this.overlayView = view;
-//        if (overlayView != null) {
-//            dismissContainer.addView(view);
-//            ViewGroup.LayoutParams lp = view.getLayoutParams();
-//            lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
-//            lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-//            view.setLayoutParams(lp);
-//        }
+        if (overlayView != null) {
+            dismissContainer.addView(view);
+            ViewGroup.LayoutParams lp = view.getLayoutParams();
+            lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            view.setLayoutParams(lp);
+        }
     }
 
     public void allowZooming(boolean allowZooming) {
