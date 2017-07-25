@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.controller.BaseControllerListener;
-import com.facebook.drawee.drawable.ProgressBarDrawable;
 import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.interfaces.DraweeController;
@@ -23,6 +22,7 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.stfalcon.frescoimageviewer.adapter.RecyclingPagerAdapter;
 import com.stfalcon.frescoimageviewer.adapter.ViewHolder;
+import com.stfalcon.frescoimageviewer.drawee.CircleProgressBarDrawable;
 import com.stfalcon.frescoimageviewer.drawee.ZoomableDraweeView;
 
 import java.io.IOException;
@@ -265,18 +265,6 @@ class ImageViewerAdapter
 
         private void buildImage(final String url, final int rotate) {
 
-//            PipelineDraweeControllerBuilder controllerBuilder = Fresco.newDraweeControllerBuilder();
-//            controllerBuilder.setUri(url);
-//
-//            controllerBuilder.setOldController(drawee.getController());
-//            controllerBuilder.setControllerListener(getDraweeControllerListener(drawee));
-//            if (imageRequestBuilder != null) {
-//
-//                imageRequestBuilder.setSource(Uri.parse(url))
-//                        .setRotationOptions(RotationOptions.forceRotation(rotate));
-//                controllerBuilder.setImageRequest(imageRequestBuilder.build());
-//            }
-//            drawee.setController(controllerBuilder.build());
             ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
                     .setRotationOptions(RotationOptions.forceRotation(rotate))
                     .build();
@@ -285,14 +273,11 @@ class ImageViewerAdapter
                     .setControllerListener(getDraweeControllerListener(drawee))
                     .setImageRequest(request)
                     .build();
-            final ProgressBarDrawable progressBarDrawable = new ProgressBarDrawable();
-            progressBarDrawable.setColor(context.getResources().getColor(R.color.colorAccent));
-            progressBarDrawable.setBackgroundColor(context.getResources().getColor(R.color.colorPrimaryDark));
-//            progressBarDrawable.setRadius(5);
+
+            CircleProgressBarDrawable progressBarDrawable = new CircleProgressBarDrawable();
+            progressBarDrawable.setColor(Color.WHITE);
             final Drawable failureDrawable = context.getResources().getDrawable(R.drawable.empty);
-            DrawableCompat.setTint(failureDrawable, Color.RED);
-            final Drawable placeholderDrawable = context.getResources().getDrawable(R.drawable.loading);
-            drawee.getHierarchy().setPlaceholderImage(placeholderDrawable, ScalingUtils.ScaleType.CENTER_INSIDE);
+            DrawableCompat.setTint(failureDrawable, Color.WHITE);
             drawee.getHierarchy().setFailureImage(failureDrawable, ScalingUtils.ScaleType.CENTER_INSIDE);
             drawee.getHierarchy().setProgressBarImage(progressBarDrawable, ScalingUtils.ScaleType.CENTER_INSIDE);
             drawee.setController(controller);
