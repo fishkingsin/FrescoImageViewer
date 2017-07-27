@@ -276,6 +276,7 @@ class ImageViewerAdapter
 
             CircleProgressBarDrawable progressBarDrawable = new CircleProgressBarDrawable();
             progressBarDrawable.setColor(Color.WHITE);
+            progressBarDrawable.setBackgroundColor(Color.DKGRAY);
             final Drawable failureDrawable = context.getResources().getDrawable(R.drawable.empty);
             DrawableCompat.setTint(failureDrawable, Color.WHITE);
             drawee.getHierarchy().setFailureImage(failureDrawable, ScalingUtils.ScaleType.CENTER_INSIDE);
