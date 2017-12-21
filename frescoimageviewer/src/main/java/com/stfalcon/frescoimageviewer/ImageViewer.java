@@ -79,7 +79,7 @@ public class ImageViewer implements OnDismissListener, DialogInterface.OnKeyList
         viewer.setOverlayView(builder.overlayView);
         viewer.setImageMargin(builder.imageMarginPixels);
         viewer.setContainerPadding(builder.containerPaddingPixels);
-        viewer.setUrls(builder.dataSet, builder.startPosition, builder.onOrientationListener);
+        viewer.setUrls(builder.dataSet, builder.startPosition, builder.onOrientationListener, builder.thumbnails);
         viewer.setPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
@@ -238,6 +238,7 @@ public class ImageViewer implements OnDismissListener, DialogInterface.OnKeyList
         private boolean shouldStatusBarHide = true;
         private boolean isZoomingAllowed = true;
         private boolean isSwipeToDismissAllowed = true;
+        private List<String> thumbnails;
 
         /**
          * Constructor using a context and images urls array for this builder and the {@link ImageViewer} it creates.
@@ -270,6 +271,11 @@ public class ImageViewer implements OnDismissListener, DialogInterface.OnKeyList
         @SuppressWarnings("deprecation")
         public Builder setBackgroundColorRes(@ColorRes int color) {
             return this.setBackgroundColor(context.getResources().getColor(color));
+        }
+
+        public Builder setThumbnails(List<String> thumbnails) {
+            this.thumbnails = thumbnails;
+            return this;
         }
 
         /**

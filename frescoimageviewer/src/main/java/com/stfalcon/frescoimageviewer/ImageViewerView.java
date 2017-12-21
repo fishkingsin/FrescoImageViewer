@@ -77,10 +77,11 @@ public class ImageViewerView extends RelativeLayout
         init();
     }
 
-    public void setUrls(ImageViewer.DataSet<?> dataSet, int startPosition , ImageViewer.OnOrientationListener orientationListener) {
+    public void setUrls(ImageViewer.DataSet<?> dataSet, int startPosition , ImageViewer.OnOrientationListener orientationListener, List<String> thumbnails) {
         adapter = new ImageViewerAdapter(
-                getContext(), dataSet, customImageRequestBuilder, customDraweeHierarchyBuilder, isZoomingAllowed, orientationListener);
+                getContext(), dataSet, customImageRequestBuilder, customDraweeHierarchyBuilder, isZoomingAllowed, orientationListener, thumbnails);
         pager.setAdapter(adapter);
+        pager.setOffscreenPageLimit(1);
         setStartPosition(startPosition);
     }
 
@@ -181,7 +182,7 @@ public class ImageViewerView extends RelativeLayout
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
+                adapter.stopVideoPlayback();
             }
 
             @Override

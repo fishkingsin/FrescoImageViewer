@@ -5,12 +5,17 @@ import android.graphics.Color;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.VideoView;
 
+import com.danikula.videocache.HttpProxyCacheServer;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.controller.BaseControllerListener;
 import com.facebook.drawee.drawable.ScalingUtils;
@@ -46,23 +51,28 @@ class ImageViewerAdapter
 
     private Context context;
     private ImageViewer.DataSet<?> dataSet;
+    private List<String> thumbnails;
     private HashSet<ImageViewHolder> holders;
     private ImageRequestBuilder imageRequestBuilder;
     private GenericDraweeHierarchyBuilder hierarchyBuilder;
     private boolean isZoomingAllowed;
     private ImageViewer.OnOrientationListener orientationListener;
 
+    static HttpProxyCacheServer httpProxyCache;
+
     ImageViewerAdapter(Context context, ImageViewer.DataSet<?> dataSet,
                        ImageRequestBuilder imageRequestBuilder,
                        GenericDraweeHierarchyBuilder hierarchyBuilder,
                        boolean isZoomingAllowed,
-                       ImageViewer.OnOrientationListener orientationListener) {
+                       ImageViewer.OnOrientationListener orientationListener,
+                       List<String> thumbnails) {
         this.context = context;
         this.dataSet = dataSet;
         this.holders = new HashSet<>();
         this.imageRequestBuilder = imageRequestBuilder;
         this.hierarchyBuilder = hierarchyBuilder;
         this.isZoomingAllowed = isZoomingAllowed;
+        this.thumbnails = thumbnails;
 
         this.orientationListener = orientationListener;
 
@@ -89,12 +99,11 @@ class ImageViewerAdapter
 
     @Override
     public ImageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        ZoomableDraweeView drawee = new ZoomableDraweeView(context);
-        drawee.setEnabled(isZoomingAllowed);
+        View itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.adapter_view, parent, false);
 
-        ImageViewHolder holder = new ImageViewHolder(drawee);
+        ImageViewHolder holder = new ImageViewHolder(itemView);
         holders.add(holder);
-
         return holder;
     }
 
@@ -149,24 +158,75 @@ class ImageViewerAdapter
 
         private int position = -1;
         private ZoomableDraweeView drawee;
+        private VideoView videoView;
+        private ImageView playButton;
         private boolean isScaled;
 
         ImageViewHolder(View itemView) {
             super(itemView);
-            drawee = (ZoomableDraweeView) itemView;
+//            drawee = (ZoomableDraweeView) itemView;
+            drawee = (ZoomableDraweeView) itemView.findViewById(R.id.draweeView);
+            videoView = (VideoView) itemView.findViewById(R.id.videoView);
+            playButton = (ImageView) itemView.findViewById(R.id.iv_play);
         }
 
         void bind(int position) {
             this.position = position;
 
-            tryToSetHierarchy();
-            int orientation = 0;
-            if (orientationListener != null) {
-                orientation = orientationListener.OnOrientaion(position);
-            }
-            setController(dataSet.format(position), orientation);
+            String mediaUrl = dataSet.format(position);
+            if (mediaUrl.contains(".mp4") || mediaUrl.contains(".3gp") || mediaUrl.contains(".m4a") || mediaUrl.contains(".mkv")) {
+                Log.v("ImageViewerAdapter", "contains mp4");
 
-            drawee.setOnScaleChangeListener(this);
+                drawee.setVisibility(View.VISIBLE);
+                videoView.setVisibility(View.VISIBLE);
+                playButton.setVisibility(View.VISIBLE);
+
+                //used for video caching
+                HttpProxyCacheServer proxy = getProxy();
+                videoView.setVideoPath(proxy.getProxyUrl(mediaUrl));
+
+                videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        Log.d("ImageViewerAdapter", "Video ended");
+                        drawee.setVisibility(View.VISIBLE);
+                        playButton.setVisibility(View.VISIBLE);
+                    }
+                });
+
+                playButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        videoView.start();
+                        drawee.setVisibility(View.INVISIBLE);
+                        playButton.setVisibility(View.INVISIBLE);
+                        videoView.setVisibility(View.VISIBLE);
+                    }
+                });
+
+                tryToSetHierarchy();
+                int orientation = 0;
+                if (orientationListener != null) {
+                    orientation = orientationListener.OnOrientaion(position);
+                }
+
+                //use thumbnail for video preview
+                setController(thumbnails.get(position), orientation, true);
+
+            } else {
+                drawee.setVisibility(View.VISIBLE);
+                videoView.setVisibility(View.INVISIBLE);
+                playButton.setVisibility(View.INVISIBLE);
+
+                tryToSetHierarchy();
+                int orientation = 0;
+                if (orientationListener != null) {
+                    orientation = orientationListener.OnOrientaion(position);
+                }
+
+                setController(mediaUrl, orientation, true);
+                drawee.setOnScaleChangeListener(this);
+            }
         }
 
         @Override
@@ -185,8 +245,8 @@ class ImageViewerAdapter
             }
         }
 
-        private void setController(String url, int orientation) {
-            buildImage(url, orientation);
+        private void setController(String url, int orientation, boolean videoPreview) {
+            buildImage(url, orientation, videoPreview);
 
 //            prefetchHeader(url, new HeaderResponse() {
 //
@@ -263,16 +323,25 @@ class ImageViewerAdapter
             }
         }
 
-        private void buildImage(final String url, final int rotate) {
+        private void buildImage(final String url, final int rotate, boolean videoPreview) {
 
             ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
                     .setRotationOptions(RotationOptions.forceRotation(rotate))
                     .build();
-            DraweeController controller = Fresco.newDraweeControllerBuilder()
-                    .setOldController(drawee.getController())
-                    .setControllerListener(getDraweeControllerListener(drawee))
-                    .setImageRequest(request)
-                    .build();
+
+            DraweeController controller;
+            if (videoPreview) {
+                controller = Fresco.newDraweeControllerBuilder()
+                        .setOldController(drawee.getController())
+                        .setImageRequest(request)
+                        .build();
+            } else {
+                controller = Fresco.newDraweeControllerBuilder()
+                        .setOldController(drawee.getController())
+                        .setControllerListener(getDraweeControllerListener(drawee))
+                        .setImageRequest(request)
+                        .build();
+            }
 
             CircleProgressBarDrawable progressBarDrawable = new CircleProgressBarDrawable();
             progressBarDrawable.setColor(Color.WHITE);
@@ -290,5 +359,23 @@ class ImageViewerAdapter
         void onErrorLoaded(String s);
 
         void onResponseLoaded(int rotate);
+    }
+
+    public void stopVideoPlayback() {
+        for (ImageViewHolder holder : holders) {
+            if (holder.videoView.isPlaying()) {
+                holder.videoView.stopPlayback();
+                holder.videoView.setVisibility(View.INVISIBLE);
+                holder.drawee.setVisibility(View.VISIBLE);
+                holder.playButton.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    public HttpProxyCacheServer getProxy() {
+        if (httpProxyCache == null) {
+            httpProxyCache = new HttpProxyCacheServer(context);
+        }
+        return httpProxyCache;
     }
 }
