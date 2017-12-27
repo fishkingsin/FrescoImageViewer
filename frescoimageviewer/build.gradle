@@ -1,13 +1,13 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
-def publishVersionName='0.5.0-dev6'
+def publishVersionName='1.0.0'
 buildscript {
     repositories {
         jcenter()
     }
-    dependencies {
-        classpath 'com.novoda:bintray-release:0.5.0'
-    }
+//    dependencies {
+//        classpath 'com.novoda:bintray-release:0.5.0'
+//    }
 }
 android {
     compileSdkVersion 25
