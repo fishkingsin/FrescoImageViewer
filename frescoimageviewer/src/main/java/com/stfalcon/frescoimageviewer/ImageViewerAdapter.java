@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -58,6 +59,7 @@ class ImageViewerAdapter
     private boolean isZoomingAllowed;
     private ImageViewer.OnOrientationListener orientationListener;
 
+    private Handler mHandler = new Handler();
     static HttpProxyCacheServer httpProxyCache;
 
     ImageViewerAdapter(Context context, ImageViewer.DataSet<?> dataSet,
@@ -198,9 +200,15 @@ class ImageViewerAdapter
                     @Override
                     public void onClick(View v) {
                         videoView.start();
-                        drawee.setVisibility(View.INVISIBLE);
                         playButton.setVisibility(View.INVISIBLE);
                         videoView.setVisibility(View.VISIBLE);
+                        //delay added for smooth transition from video_preview (drawee) -> video (videoView) when video is played initially
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                drawee.setVisibility(View.INVISIBLE);
+                            }
+                        }, 300);
                     }
                 });
 
@@ -224,7 +232,7 @@ class ImageViewerAdapter
                     orientation = orientationListener.OnOrientaion(position);
                 }
 
-                setController(mediaUrl, orientation, true);
+                setController(mediaUrl, orientation, false);
                 drawee.setOnScaleChangeListener(this);
             }
         }
