@@ -219,7 +219,7 @@ class ImageViewerAdapter
                 }
 
                 //use thumbnail for video preview
-                setController(thumbnails.get(position), orientation, true);
+                setController(thumbnails.get(position), orientation, false);
 
             } else {
                 drawee.setVisibility(View.VISIBLE);
