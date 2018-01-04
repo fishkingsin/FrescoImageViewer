@@ -381,9 +381,9 @@ class ImageViewerAdapter
     }
 
     public HttpProxyCacheServer getProxy() {
-        if (httpProxyCache == null) {
-            httpProxyCache = new HttpProxyCacheServer(context);
-        }
-        return httpProxyCache;
+//        if (httpProxyCache == null) {
+//            httpProxyCache = new HttpProxyCacheServer(context);
+//        }
+        return new HttpProxyCacheServer(context);
     }
 }
